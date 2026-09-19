@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'none'; img-src 'self' file: data:; style-src 'self' 'unsafe-inline'; script-src 'self'"
+    />
+    <title>Toolbox · 本机工具仪表盘</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div id="app">
+      <aside class="sidebar">
+        <div class="brand">
+          <span class="brand-mark">🧰</span>
+          <div>
+            <div class="brand-title">Toolbox</div>
+            <div class="brand-sub">本机工具仪表盘</div>
+          </div>
+        </div>
+        <nav id="nav" class="nav"></nav>
+        <div class="sidebar-foot">
+          <div id="stats" class="stats"></div>
+          <div class="foot-actions">
+            <button id="btn-rescan" class="ghost" title="重新扫描 E:\AI\tools 与开始菜单">↻ 重新扫描</button>
+            <button id="btn-datadir" class="ghost" title="打开数据目录">📁 数据</button>
+          </div>
+        </div>
+      </aside>
+
+      <main class="main">
+        <header class="topbar">
+          <div class="search-wrap">
+            <span class="search-icon">⌕</span>
+            <input id="search" type="search" placeholder="搜索工具名 / 描述 / 路径  （Ctrl+F 聚焦，Esc 清空）" autocomplete="off" />
+          </div>
+          <div class="filters" id="filters"></div>
+        </header>
+
+        <div id="banner" class="banner hidden"></div>
+        <section id="grid" class="grid"></section>
+        <div id="empty" class="empty hidden">没有匹配的工具</div>
+      </main>
+    </div>
+
+    <div id="toast" class="toast hidden"></div>
+
+    <template id="card-tpl">
+      <article class="card">
+        <div class="card-head">
+          <div class="icon"></div>
+          <div class="title-block">
+            <div class="name"></div>
+            <div class="meta"></div>
+          </div>
+          <button class="star" title="收藏 / 取消收藏">☆</button>
+        </div>
+        <p class="desc"></p>
+        <div class="tags"></div>
+        <div class="card-actions">
+          <button class="primary act-launch">▶ 启动</button>
+          <button class="act-dir" title="打开所在目录">📁</button>
+          <button class="act-copy" title="复制命令">⧉</button>
+        </div>
+        <div class="status-dot" title=""></div>
+      </article>
+    </template>
+
+    <script src="app.js"></script>
+  </body>
+</html>

@@ -1,0 +1,45 @@
+{
+  "name": "toolbox",
+  "version": "0.1.0",
+  "description": "本机工具仪表盘 — 收录 E:\\AI\\tools 便携工具与开始菜单软件，一键启动 + 状态感知",
+  "main": "dist/main/main.js",
+  "author": "Q1y1ng",
+  "license": "MIT",
+  "scripts": {
+    "build": "tsc",
+    "watch": "tsc -w",
+    "dev": "npm run build && electron .",
+    "start": "electron .",
+    "scan": "node scripts/scan.cjs",
+    "verify:launcher": "node scripts/verify-launcher.cjs",
+    "shot": "node scripts/shot.cjs",
+    "typecheck": "tsc --noEmit",
+    "dist": "npm run build && electron-builder --win portable --publish never"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "electron": "^43.0.0",
+    "electron-builder": "^26.0.0",
+    "typescript": "^5.8.0"
+  },
+  "build": {
+    "appId": "dev.q1y1ng.toolbox",
+    "productName": "Toolbox",
+    "directories": {
+      "output": "dist-electron"
+    },
+    "files": [
+      "dist/**/*",
+      "src/renderer/**/*",
+      "assets/**/*",
+      "data/curated-tools.json",
+      "package.json"
+    ],
+    "win": {
+      "target": "portable"
+    },
+    "extraMetadata": {
+      "main": "dist/main/main.js"
+    }
+  }
+}

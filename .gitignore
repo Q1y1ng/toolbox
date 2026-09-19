@@ -1,0 +1,13 @@
+node_modules/
+dist/
+dist-electron/
+data/tools.json
+data/icons/
+data/state.json
+data/scan-raw.json
+data/app-state.json
+data/shot*.png
+*.log
+*.tmp
+.DS_Store
+*.tmp-*
