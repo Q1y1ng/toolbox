@@ -1,22 +1,22 @@
 /** 共享类型定义（主进程 / 预加载 / 渲染器契约） */
 
-export type ToolKind = 'cli' | 'gui' | 'script' | 'web' | 'folder' | 'lnk';
+export type ToolKind = "cli" | "gui" | "script" | "web" | "folder" | "lnk";
 
 export type ToolCategory =
-  | 'dev'
-  | 'system'
-  | 'doc'
-  | 'media'
-  | 'utility'
-  | 'script'
-  | 'app'
-  | 'game'
-  | 'other';
+  | "dev"
+  | "system"
+  | "doc"
+  | "media"
+  | "utility"
+  | "script"
+  | "app"
+  | "game"
+  | "other";
 
 export type ProbeSpec =
-  | { type: 'process'; name: string }
-  | { type: 'port'; port: number }
-  | { type: 'http'; url: string };
+  | { type: "process"; name: string }
+  | { type: "port"; port: number }
+  | { type: "http"; url: string };
 
 export interface Tool {
   id: string;
@@ -33,7 +33,7 @@ export interface Tool {
   tags?: string[];
   probe?: ProbeSpec;
   /** curated = 手工权威清单 | startmenu = 开始菜单扫描 | portable = 便携目录扫描 */
-  source: 'curated' | 'startmenu' | 'portable';
+  source: "curated" | "startmenu" | "portable";
   /** 启动路径是否存在（死链检测） */
   exists: boolean;
   /** 便携工具所在目录（打开目录 / CLI 用） */
@@ -42,7 +42,7 @@ export interface Tool {
 
 export interface ToolStatus {
   id: string;
-  state: 'running' | 'stopped' | 'unknown';
+  state: "running" | "stopped" | "unknown";
   detail?: string;
   checkedAt: number;
 }

@@ -12,10 +12,12 @@
 
 | 指标 | 数值 |
 | --- | --- |
-| 收录工具 | **234**（curated 51 · 开始菜单 180 · 自动发现 3） |
-| 扫描耗时 | ≈2.2 s（便携目录 + 237 个 lnk） |
-| 失效入口自动识别 | **9 个**（QGIS、MuMu、Steam 重复项、PyCharm 2024.1…目标已不存在） |
-| 空载内存 | 见「性能」一节 |
+| 收录工具 | **234**（curated 51 · 开始菜单 183） |
+| 分类分布 | 开发 81 · 系统 64 · 常用软件 24 · 媒体 24 · 游戏 16 · 效率 14 · 文档 7 · 自建脚本 4 |
+| 扫描耗时 | ≈2.2 s（43 个便携目录 + 237 个 lnk） |
+| 失效入口自动识别 | **9 个**（QGIS、MuMu、Steam 重复项、PyCharm 2024.1… 目标已不存在） |
+| 主进程工作集 | ≈64 MB（实测，渲染进程另计） |
+| 带状态探测的工具 | 4 个（Everything / QuickLook / Snipaste / Mermaid Live）—— 可继续配 `probe` |
 
 ## 功能
 
@@ -37,6 +39,22 @@ npm run build        # tsc → dist/
 npm run scan         # 扫描本机 → data/scan-raw.json
 npm start            # 启动仪表盘
 ```
+
+### 日常使用
+
+双击根目录的 **`启动Toolbox.cmd`**：优先启动已打包的便携版，没有则回退到开发态启动。
+
+### 打包便携版（单文件 exe，零安装）
+
+```bash
+npm run dist         # → dist-electron/Toolbox 0.1.0.exe（≈89 MB）
+```
+
+打包版特性：
+
+- 数据落在 **exe 同级的 `Toolbox-data\`**（`PORTABLE_EXECUTABLE_DIR`），不写 C:，删目录即彻底卸载；
+- 首次运行会自动播种 `curated-tools.json` 并**自动扫描一次**（约 2 秒），开箱即用；
+- 之后按「重新扫描」或托盘菜单刷新即可。
 
 其他脚本：
 
@@ -103,15 +121,19 @@ scripts/
 ## 已知坑（踩过的）
 
 1. **PowerShell 5.1 输出编码**：stdout 被重定向时按 OEM 代码页（cp936）输出，
-   直接 `utf8` 解码会导致中文快捷方式名全变乱码（且让"卸载"类噪音过滤失效）。
+   直接 `utf8` 解码会导致中文快捷方式名全变乱码（且让“卸载”类噪音过滤失效）。
    解决：在 PS 脚本首行 `[Console]::OutputEncoding = [System.Text.Encoding]::UTF8`。
 2. **PowerShell 脚本文件编码**：`.ps1` 若为无 BOM 的 UTF-8，PS 5.1 按 ANSI 解码，
    中文注释乱码后甚至会破坏脚本解析（报 `TypeNotFound`）。
    解决：`make-icons.ps1` 存为 **UTF-8 带 BOM**。
-3. **`node_modules/electron` 是目录**：当可执行文件路径用会失败；
+3. **`.cmd` 内容保持纯 ASCII**：cmd.exe 按 OEM 代码页读 `.cmd`，UTF-8 中文注释会乱码；
+   启动器注释因此写英文。
+4. **`node_modules/electron` 是目录**：当可执行文件路径用会失败；
    在普通 Node 里 `require('electron')` 才返回真正的 exe 路径。
-4. **agent shell 导出了 `ELECTRON_RUN_AS_NODE=1`**：启动 Electron 前必须 `env -u`，
+5. **agent shell 导出了 `ELECTRON_RUN_AS_NODE=1`**：启动 Electron 前必须 `env -u`，
    否则以纯 Node 模式静默退出（`scripts/shot.cjs` 里已处理）。
+6. **electron-builder 偶发 `EPERM rename win-unpacked`**：句柄被占（杀毒/索引器），
+   **直接重试即可成功**。
 
 ## 性能
 

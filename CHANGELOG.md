@@ -39,3 +39,16 @@
   改为判断「便携目录是否为某条 curated 路径的祖先」。
 - `node_modules/electron` 是目录而非可执行文件：改用普通 Node 下 `require('electron')`
   返回的 exe 路径。
+- **打包版首次运行显示 0 个工具**：`Registry` 在模块加载期构造（那时 `curated-tools.json`
+  还没从 asar 播种到数据目录），播种后没有重新加载——现在播种后显式 `registry.load()`。
+- **便携版数据目录会丢在临时目录**：便携 exe 运行时 `app.getPath('exe')` 指向解压副本，
+  改为优先使用 electron-builder 注入的 `PORTABLE_EXECUTABLE_DIR`，数据落在 exe 同级
+  `Toolbox-data\`。
+
+### 变更
+
+- 首次运行（数据目录无 `scan-raw.json`）会自动扫描一次，开箱即用，不再只剩 curated 清单。
+- 打包：`npm run dist` → `dist-electron/Toolbox 0.1.0.exe`（便携单文件，≈89 MB，已实测运行）；
+  新增根目录 `启动Toolbox.cmd`（优先便携版，回退开发态）。
+- 代码风格由 pi-lens/biome 统一（双引号 + 多行属性展开），纯格式化、行为不变
+  （重排后 `tsc --noEmit` 通过、启动器自检 6/6）。

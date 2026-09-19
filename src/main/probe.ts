@@ -6,9 +6,9 @@
  *   port    → TCP 连接 127.0.0.1:port（800 ms 超时）
  *   http    → GET 期望 2xx/3xx（1.5 s 超时）
  */
-import net from 'node:net';
-import { execFile } from 'node:child_process';
-import type { ProbeSpec, Tool, ToolStatus } from './types';
+import net from "node:net";
+import { execFile } from "node:child_process";
+import type { ProbeSpec, Tool, ToolStatus } from "./types";
 
 function probePort(port: number, timeout = 800): Promise<boolean> {
   return new Promise((resolve) => {
@@ -21,10 +21,10 @@ function probePort(port: number, timeout = 800): Promise<boolean> {
       resolve(v);
     };
     sock.setTimeout(timeout);
-    sock.once('connect', () => done(true));
-    sock.once('timeout', () => done(false));
-    sock.once('error', () => done(false));
-    sock.connect(port, '127.0.0.1');
+    sock.once("connect", () => done(true));
+    sock.once("timeout", () => done(false));
+    sock.once("error", () => done(false));
+    sock.connect(port, "127.0.0.1");
   });
 }
 
@@ -43,42 +43,46 @@ async function probeHttp(url: string, timeout = 1500): Promise<boolean> {
 /** 批量查询进程是否存在，返回小写进程名集合 */
 function listProcesses(names: string[]): Promise<Set<string>> {
   return new Promise((resolve) => {
-    const bare = names.map((n) => n.replace(/\.exe$/i, ''));
-    const quoted = bare.map((n) => `'${n.replace(/'/g, "''")}'`).join(',');
+    const bare = names.map((n) => n.replace(/\.exe$/i, ""));
+    const quoted = bare.map((n) => `'${n.replace(/'/g, "''")}'`).join(",");
     const ps = `$names = @(${quoted}); Get-Process -ErrorAction SilentlyContinue | Where-Object { $names -contains $_.ProcessName } | Select-Object -ExpandProperty ProcessName -Unique`;
     execFile(
-      'powershell.exe',
-      ['-NoProfile', '-NonInteractive', '-Command', ps],
+      "powershell.exe",
+      ["-NoProfile", "-NonInteractive", "-Command", ps],
       { timeout: 8000, windowsHide: true },
       (_err, stdout) => {
         const set = new Set<string>();
-        for (const line of String(stdout || '').split(/\r?\n/)) {
+        for (const line of String(stdout || "").split(/\r?\n/)) {
           const t = line.trim();
           if (t) set.add(t.toLowerCase());
         }
         resolve(set);
-      }
+      },
     );
   });
 }
 
-async function statusFor(t: Tool, spec: ProbeSpec, running: Set<string>): Promise<ToolStatus> {
+async function statusFor(
+  t: Tool,
+  spec: ProbeSpec,
+  running: Set<string>,
+): Promise<ToolStatus> {
   const checkedAt = Date.now();
-  if (spec.type === 'process') {
-    const key = spec.name.replace(/\.exe$/i, '').toLowerCase();
+  if (spec.type === "process") {
+    const key = spec.name.replace(/\.exe$/i, "").toLowerCase();
     const isUp = running.has(key);
     return {
       id: t.id,
-      state: isUp ? 'running' : 'stopped',
+      state: isUp ? "running" : "stopped",
       detail: isUp ? `${spec.name} 正在运行` : `${spec.name} 未运行`,
       checkedAt,
     };
   }
-  if (spec.type === 'port') {
+  if (spec.type === "port") {
     const up = await probePort(spec.port);
     return {
       id: t.id,
-      state: up ? 'running' : 'stopped',
+      state: up ? "running" : "stopped",
       detail: up ? `端口 ${spec.port} 在监听` : `端口 ${spec.port} 无响应`,
       checkedAt,
     };
@@ -86,7 +90,7 @@ async function statusFor(t: Tool, spec: ProbeSpec, running: Set<string>): Promis
   const up = await probeHttp(spec.url);
   return {
     id: t.id,
-    state: up ? 'running' : 'stopped',
+    state: up ? "running" : "stopped",
     detail: up ? `${spec.url} 可访问` : `${spec.url} 不可访问`,
     checkedAt,
   };
@@ -100,10 +104,12 @@ export async function probeTools(tools: Tool[]): Promise<ToolStatus[]> {
     const spec = t.probe;
     if (!spec) continue;
     probed.push({ tool: t, spec });
-    if (spec.type === 'process') procNames.push(spec.name);
+    if (spec.type === "process") procNames.push(spec.name);
   }
   if (!probed.length) return [];
 
-  const running = procNames.length ? await listProcesses(procNames) : new Set<string>();
+  const running = procNames.length
+    ? await listProcesses(procNames)
+    : new Set<string>();
   return Promise.all(probed.map((p) => statusFor(p.tool, p.spec, running)));
 }

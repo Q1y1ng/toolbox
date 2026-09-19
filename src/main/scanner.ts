@@ -9,21 +9,21 @@
  *   - 不跟随 junction / 符号链接（跳过 reparse point）
  *   - 外部命令一律带超时
  */
-import fs from 'node:fs';
-import path from 'node:path';
-import { execFileSync } from 'node:child_process';
-import { writeJsonAtomic } from './jsonfile';
+import fs from "node:fs";
+import path from "node:path";
+import { execFileSync } from "node:child_process";
+import { writeJsonAtomic } from "./jsonfile";
 
-const EXE_EXT = new Set(['.exe', '.cmd', '.bat']);
+const EXE_EXT = new Set([".exe", ".cmd", ".bat"]);
 const SKIP_DIRS = new Set([
-  'node_modules',
-  '.git',
-  'docs',
-  'locales',
-  'lang',
-  'languages',
-  'translations',
-  '__pycache__',
+  "node_modules",
+  ".git",
+  "docs",
+  "locales",
+  "lang",
+  "languages",
+  "translations",
+  "__pycache__",
 ]);
 
 export interface PortableEntry {
@@ -64,8 +64,8 @@ function isReparsePoint(p: string): boolean {
   }
 }
 
-export function findExecutables(rootDir: string): PortableEntry['executables'] {
-  const found: PortableEntry['executables'] = [];
+export function findExecutables(rootDir: string): PortableEntry["executables"] {
+  const found: PortableEntry["executables"] = [];
   const queue: { dir: string; depth: number }[] = [{ dir: rootDir, depth: 0 }];
   while (queue.length) {
     const { dir, depth } = queue.shift()!;
@@ -88,7 +88,12 @@ export function findExecutables(rootDir: string): PortableEntry['executables'] {
           }
           found.push({ path: full, name: e.name, size, depth });
         }
-      } else if (e.isDirectory() && depth < 2 && !SKIP_DIRS.has(e.name.toLowerCase()) && !e.name.startsWith('.')) {
+      } else if (
+        e.isDirectory() &&
+        depth < 2 &&
+        !SKIP_DIRS.has(e.name.toLowerCase()) &&
+        !e.name.startsWith(".")
+      ) {
         queue.push({ dir: full, depth: depth + 1 });
       }
     }
@@ -96,7 +101,10 @@ export function findExecutables(rootDir: string): PortableEntry['executables'] {
   return found;
 }
 
-export function scanPortableTools(dir: string): { tools: PortableEntry[]; error: string | null } {
+export function scanPortableTools(dir: string): {
+  tools: PortableEntry[];
+  error: string | null;
+} {
   const out: PortableEntry[] = [];
   let entries: fs.Dirent[];
   try {
@@ -108,7 +116,12 @@ export function scanPortableTools(dir: string): { tools: PortableEntry[]; error:
     if (!e.isDirectory()) continue;
     const full = path.join(dir, e.name);
     if (isReparsePoint(full)) continue;
-    out.push({ folder: e.name, dir: full, exists: true, executables: findExecutables(full) });
+    out.push({
+      folder: e.name,
+      dir: full,
+      exists: true,
+      executables: findExecutables(full),
+    });
   }
   return { tools: out, error: null };
 }
@@ -140,12 +153,22 @@ foreach ($root in $roots) {
 $rows | ConvertTo-Json -Depth 3 -Compress
 `;
 
-export function readStartMenuLinks(): { items: StartMenuEntry[]; error: string | null } {
+export function readStartMenuLinks(): {
+  items: StartMenuEntry[];
+  error: string | null;
+} {
   try {
     const buf = execFileSync(
-      'powershell.exe',
-      ['-NoProfile', '-NonInteractive', '-ExecutionPolicy', 'Bypass', '-Command', PS_LNK_SCRIPT],
-      { encoding: 'utf8', timeout: 120_000, maxBuffer: 32 * 1024 * 1024 }
+      "powershell.exe",
+      [
+        "-NoProfile",
+        "-NonInteractive",
+        "-ExecutionPolicy",
+        "Bypass",
+        "-Command",
+        PS_LNK_SCRIPT,
+      ],
+      { encoding: "utf8", timeout: 120_000, maxBuffer: 32 * 1024 * 1024 },
     );
     const text = String(buf).trim();
     if (!text) return { items: [], error: null };
@@ -158,7 +181,7 @@ export function readStartMenuLinks(): { items: StartMenuEntry[]; error: string |
 
 const NOISE_RE =
   /(^|[\s\-_（(])(uninstall|卸载|remove|help|帮助|readme|read me|manual|手册|licen[cs]e|许可|changelog|更新日志|release notes|版本说明|documentation|文档|samples?|示例|localization|skin format|user guide|update|updater|升级|reporter|report a problem|error report|setup|安装|readme|wizard|助手|诊断|diagnostic|redistributable|runtime|driver|驱动|reference|参考|translator|recover|恢复|crash|support|反馈|feedback)([\s\-_）)]|$)/i;
-const NOISE_NAME_EXACT = new Set(['uninstall', 'readme', 'setup', 'help']);
+const NOISE_NAME_EXACT = new Set(["uninstall", "readme", "setup", "help"]);
 const PREFIX_NOISE_RE = /^(卸载|uninstall|remove\s)/i;
 
 export function isNoise(name: string): boolean {
@@ -177,7 +200,7 @@ export function filterStartMenu(items: StartMenuEntry[]): {
   const kept: StartMenuEntry[] = [];
   let droppedCount = 0;
   for (const it of items) {
-    const target = (it.target || '').trim();
+    const target = (it.target || "").trim();
     if (!target) {
       droppedCount++;
       continue;
@@ -187,7 +210,7 @@ export function filterStartMenu(items: StartMenuEntry[]): {
       continue;
     }
     const low = target.toLowerCase();
-    if (low.endsWith('\\unins000.exe') || low.includes('\\uninstall')) {
+    if (low.endsWith("\\unins000.exe") || low.includes("\\uninstall")) {
       droppedCount++;
       continue;
     }
@@ -195,7 +218,11 @@ export function filterStartMenu(items: StartMenuEntry[]): {
     it.lnkExists = fs.existsSync(it.lnk);
     kept.push(it);
   }
-  return { kept, droppedCount, deadCount: kept.filter((k) => !k.targetExists).length };
+  return {
+    kept,
+    droppedCount,
+    deadCount: kept.filter((k) => !k.targetExists).length,
+  };
 }
 
 export function runScan(toolsDir: string, outFile: string): ScanResult {

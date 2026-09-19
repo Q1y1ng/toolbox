@@ -25,7 +25,11 @@ body {
   height: 100%;
   background: var(--bg);
   color: var(--fg);
-  font: 13px/1.5 'Microsoft YaHei UI', 'Segoe UI', system-ui, sans-serif;
+  font:
+    13px / 1.5 "Microsoft YaHei UI",
+    "Segoe UI",
+    system-ui,
+    sans-serif;
   overflow: hidden;
   user-select: none;
 }
@@ -228,7 +232,10 @@ body {
   display: flex;
   flex-direction: column;
   gap: 8px;
-  transition: background 0.12s, transform 0.12s, border-color 0.12s;
+  transition:
+    background 0.12s,
+    transform 0.12s,
+    border-color 0.12s;
 }
 .card:hover {
   background: var(--bg-card-hover);
@@ -249,7 +256,7 @@ body {
   width: 34px;
   height: 34px;
   border-radius: 8px;
-  background: #2a3140 center/contain no-repeat;
+  background: #2a3140 center / contain no-repeat;
   display: grid;
   place-items: center;
   font-size: 16px;
