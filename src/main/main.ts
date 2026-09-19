@@ -284,7 +284,10 @@ function registerIpc() {
     const t = registry.find(id);
     if (!t) return { ok: false, message: "未找到该条目" };
     if (t.source !== "startmenu" || !t.path.toLowerCase().endsWith(".lnk")) {
-      return { ok: false, message: "只能删除开始菜单快捷方式（便携工具请用隐藏）" };
+      return {
+        ok: false,
+        message: "只能删除开始菜单快捷方式（便携工具请用隐藏）",
+      };
     }
     if (!fs.existsSync(t.path)) {
       registry.setHidden(id, true);

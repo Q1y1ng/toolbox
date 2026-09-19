@@ -14,6 +14,7 @@
     "verify:launcher": "node scripts/verify-launcher.cjs",
     "shot": "node scripts/shot.cjs",
     "shortcut": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/make-shortcut.ps1",
+    "pin:start": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/pin-start.ps1",
     "typecheck": "tsc --noEmit",
     "dist": "npm run build && electron-builder --win portable --publish never"
   },

@@ -12,7 +12,7 @@
 
 | 指标 | 数值 |
 | --- | --- |
-| 收录工具 | **236**（curated 59 · 开始菜单 176） |
+| 收录工具 | **236**（curated 60 · 开始菜单 176） |
 | 分类分布 | 开发 81 · 系统 64 · 常用软件 25 · 媒体 23 · 游戏 16 · 效率 15 · 文档 7 · 自建脚本 4 |
 | 扫描耗时 | ≈2.2 s（43 个便携目录 + 237 个 lnk） |
 | 失效入口自动识别 | **10 个**（QGIS、MuMu、Steam 过期项、PyCharm 2024.1… 目标已不存在） |
@@ -63,6 +63,20 @@ npm run shortcut        # 在桌面创建「Toolbox 工具仪表盘」快捷方�
 
 > 注意：本机桌面已被 OneDrive 重定向至 `C:\Users\<用户>\OneDrive\Desktop`，
 > 脚本用 `[Environment]::GetFolderPath('Desktop')` 取真实路径，不写死。
+
+### 开始菜单
+
+```bash
+npm run pin:start       # 写入开始菜单「所有应用」，并尝试固定到开始屏幕
+```
+
+写入位置：`%APPDATA%\Microsoft\Windows\Start Menu\Programs\`。效果：
+
+- **「所有应用」列表 + 搜索一定能用**：按 `Win` 键输入 `toolbox` 回车即可启动；
+- **钉成开始屏幕磁贴：做不到自动化**。实测（`scripts/pin-start.ps1` 会把动词枚举出来）：
+  系统确实向右键菜单提供 `固定到“开始”(P)`，但脚本调用 `DoIt()` 会被拒：
+  `Access is denied. (0x80070005 E_ACCESSDENIED)` —— 微软有意不开放给自动化。
+  **手动两步**：`Win` 键 → 输入 `toolbox` → 右键结果 → `固定到“开始”屏幕`。
 
 ### 打包便携版（单文件 exe，零安装）
 

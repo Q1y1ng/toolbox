@@ -392,8 +392,7 @@ function card(t) {
 
   // 只对「开始菜单里的失效快捷方式」提供删除（移到回收站，可还原）
   const trashBtn = node.querySelector(".act-trash");
-  const canTrash =
-    t.source === "startmenu" && t.kind === "lnk" && !t.exists;
+  const canTrash = t.source === "startmenu" && t.kind === "lnk" && !t.exists;
   if (canTrash) {
     trashBtn.classList.remove("hidden");
     trashBtn.onclick = async (e) => {
@@ -470,7 +469,8 @@ function renderViewbar() {
           const lnks = list.filter(
             (t) => t.source === "startmenu" && t.kind === "lnk",
           );
-          if (!lnks.length) return toast("这些失效项不是快捷方式，请用「全部隐藏」", true);
+          if (!lnks.length)
+            return toast("这些失效项不是快捷方式，请用「全部隐藏」", true);
           if (
             !confirm(
               `把 ${lnks.length} 个失效快捷方式移到回收站？\n\n会逐个列出：\n` +

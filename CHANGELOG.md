@@ -6,6 +6,13 @@
 
 ### 新增
 
+- **开始菜单**：`npm run pin:start`（`scripts/pin-start.ps1`）写入
+  `%APPDATA%\Microsoft\Windows\Start Menu\Programs\Toolbox 工具仪表盘.lnk`，
+  之后 `Win` 键搜 `toolbox` 即可启动；并会枚举 shell 动词尝试“固定到开始屏幕”——
+  实测该动词存在但程序化调用被系统拒（`0x80070005 E_ACCESSDENIED`），已优雅处理并给出手动两步路径。
+- 收录 `marktext-0.19.1-bak`（Mark Text 备份版）。**取证时发现目录名与内容不符**：
+  目录名叫 `-0.19.1-bak`，实际装的是 **0.20.0-rc.4**，而 `marktext\` 里才是 0.19.1——
+  已把这个事实写进卡片描述，避免以后被名字误导。
 - 项目骨架：TypeScript + Electron 43，`tsc` 编译到 `dist/`，渲染层为无构建的原生 JS。
 - **扫描器**（`src/main/scanner.ts`）：便携工具目录（BFS 深度 2、跳过 junction）+ 开始菜单
   lnk 解析（`WScript.Shell` COM），噪声过滤（卸载程序 / 帮助文档 / 更新器 / 示例），
@@ -34,7 +41,7 @@
 - `.cmd/.bat/.ps1/.html/.msc` 这类只有 Windows 通用空白图标的目标不再提图标，
   改显示**首字母头像**（分类配色）——之前的空白图看着就像“图标没显示”。
 - `TOOLBOX_SHOT_JS` 探针：启动时在页面里跑一段 JS 并把返回值写成 JSON，
-  用于回归时直接量 DOM（卡片数 / 名字 / 图标加载 / 滚动容量 / 隐藏流程）， 
+  用于回归时直接量 DOM（卡片数 / 名字 / 图标加载 / 滚动容量 / 隐藏流程），
   不必再靠肉眼看截图。
 
 ### 修复
