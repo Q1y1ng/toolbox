@@ -38,6 +38,9 @@ body {
   display: grid;
   grid-template-columns: 216px 1fr;
   height: 100vh;
+  /* 网格/弹性子项默认 min-height:auto，会被内容撑高；
+     不置 0 的话 .grid 永远不产生自己的滚动条（表现为滚轮完全没反应）。 */
+  min-height: 0;
 }
 
 /* ── 侧栏 ───────────────────────────── */
@@ -48,6 +51,7 @@ body {
   flex-direction: column;
   padding: 14px 10px 10px;
   gap: 12px;
+  min-height: 0;
 }
 
 .brand {
@@ -141,6 +145,8 @@ body {
   display: flex;
   flex-direction: column;
   min-width: 0;
+  min-height: 0;
+  overflow: hidden;
 }
 
 .topbar {
@@ -212,8 +218,39 @@ body {
   font-size: 12px;
 }
 
+.viewbar {
+  margin: 10px 16px 0;
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.viewbar button {
+  padding: 7px 12px;
+  border-radius: 8px;
+  border: 1px solid #3a4256;
+  background: #1d2433;
+  color: #cfd8e8;
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+}
+.viewbar button:hover {
+  background: #243049;
+  color: #fff;
+}
+.viewbar button.danger {
+  border-color: #6b2b2b;
+  background: #2a1c1c;
+  color: #ffb4b4;
+}
+.viewbar button.danger:hover {
+  background: #3a2323;
+  color: #fff;
+}
+
 .grid {
   flex: 1;
+  min-height: 0;
   overflow-y: auto;
   padding: 14px 16px 24px;
   display: grid;
@@ -364,6 +401,20 @@ body {
   border-color: #2c5391;
   color: #cfe1ff;
   font-weight: 600;
+}
+.card-actions .act-trash:hover {
+  border-color: #6b2b2b;
+  background: #2a1c1c;
+  color: #ffb4b4;
+}
+.card-actions .act-hide:hover {
+  border-color: #6b2b2b;
+  color: #ffb4b4;
+}
+.card-actions .act-unhide {
+  background: #1d3a2b;
+  border-color: #2c6b48;
+  color: #b7f0cf;
 }
 .card-actions .primary:hover {
   background: #24478a;

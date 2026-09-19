@@ -28,7 +28,13 @@
 - **失效入口检测**：目标不存在的快捷方式标灰 + `⚠ 路径失效`，直接列出，不再点开才发现。
 - **状态徽章**：对配了 `probe` 的工具做进程 / 端口 / HTTP 探测（15 s 轮询），绿点=在跑。
 - **收藏 / 最近使用 / 待确认收录**：收藏与最近使用落盘；扫描到未登记目录会自动进「待确认收录」。
-- **图标自动提取**：`app.getFileIcon()` 抽 exe / lnk 图标，缓存到 `data/icons/`，失败则退化为分类色块。
+- **移除不需要 / 失效的条目**（三种力度，从轻到重）：
+  - **隐藏**：卡片右上 `✕` —— 不删任何文件，进左侧「已隐藏」随时恢复；
+  - **批量**：「失效入口」视图顶部 `全部隐藏（N 条）`、「已隐藏」视图顶部 `全部恢复`；
+  - **删除快捷方式**：「失效入口」视图里对**开始菜单的失效 .lnk** 提供 `🧹`，
+    走 `shell.trashItem` **进回收站（可还原）**；便携工具永远不会被删，只能隐藏。
+- **图标自动提取**：`app.getFileIcon()` 抽 exe / lnk 图标，缓存到 `data/icons/`；
+  `.cmd/.bat/.ps1/.html/.msc` 这类只有通用空白图标的目标不取图，改用**首字母头像**（分类配色）。
 - **右键 = 管理员启动**，快捷键 `Ctrl+F` 聚焦搜索、`Esc` 清空、搜索框回车启动首个结果。
 
 ## 快速开始
@@ -155,8 +161,12 @@ scripts/
    判断：`Test-NetConnection github.com -Port 443` 为 False、而 `127.0.0.1:7890` 在 LISTEN。
    推法：`git -c http.proxy=http://127.0.0.1:7890 -c https.proxy=http://127.0.0.1:7890 push origin main`。
    （注意：`api.github.com` 一直接得通，所以 `gh api` 能用来核对远端到底推到哪了 —— 不要只看 push 回显。）
+8. **滚轮“没反应”是 flex/grid 的 `min-height:auto` 陷阱**：`html,body{overflow:hidden}` 时，
+   只要 `.main`/`.grid` 没显式 `min-height:0`，网格项会被内容撑高，`.grid` 就永远不会产生
+   自己的滚动条（表现为滚轮完全无效）。排查手法：在页面里量
+   `grid.scrollHeight > grid.clientHeight`（见 `TOOLBOX_SHOT_JS` 探针）。
 
 ## 性能
 
-- 扫描 234 个入口 ≈ 2.2 s，其中 90% 是 `WScript.Shell` 解析 237 个 lnk。
+- 扫描 235 个入口 ≈ 2.2 s，其中 90% 是 `WScript.Shell` 解析 237 个 lnk。
 - 探测只对配了 `probe` 的工具做，且进程探测合并为一次 PowerShell 调用。

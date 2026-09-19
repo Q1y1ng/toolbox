@@ -21,6 +21,10 @@ const api = {
     ipcRenderer.invoke("toolbox:favorite", id, next),
   hide: (id: string, hidden: boolean): Promise<Payload> =>
     ipcRenderer.invoke("toolbox:hide", id, hidden),
+  hideMany: (ids: string[], hidden: boolean): Promise<Payload> =>
+    ipcRenderer.invoke("toolbox:hideMany", ids, hidden),
+  trashLnk: (id: string): Promise<{ ok: boolean; message: string }> =>
+    ipcRenderer.invoke("toolbox:trashLnk", id),
   setCategory: (id: string, cat: ToolCategory) =>
     ipcRenderer.invoke("toolbox:setCategory", id, cat),
   rescan: (): Promise<Payload> => ipcRenderer.invoke("toolbox:rescan"),

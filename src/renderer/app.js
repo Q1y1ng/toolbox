@@ -16,6 +16,7 @@ const ui = {
   filters: $("filters"),
   stats: $("stats"),
   banner: $("banner"),
+  viewbar: $("viewbar"),
   toast: $("toast"),
   cardTpl: $("card-tpl"),
 };
@@ -66,7 +67,12 @@ function visibleTools() {
 }
 
 function filteredTools() {
-  let list = visibleTools();
+  const hidden = new Set(data.state.hidden);
+  // 「已隐藏」视图反过来：只看被隐藏的，其余视图一律排除隐藏项
+  let list =
+    view.kind === "hidden"
+      ? data.tools.filter((t) => hidden.has(t.id))
+      : visibleTools();
   const favs = new Set(data.state.favorites);
 
   if (view.kind === "fav") list = list.filter((t) => favs.has(t.id));
@@ -128,11 +134,21 @@ function renderNav() {
       icon: "➕",
       count: all.filter((t) => t.source === "portable").length,
     },
+    {
+      kind: "hidden",
+      label: "已隐藏",
+      icon: "🚫",
+      count: data.state.hidden.length,
+    },
   ];
 
   ui.nav.innerHTML = "";
   for (const r of rows) {
-    if (r.count === 0 && (r.kind === "dead" || r.kind === "pending")) continue;
+    if (
+      r.count === 0 &&
+      (r.kind === "dead" || r.kind === "pending" || r.kind === "hidden")
+    )
+      continue;
     ui.nav.append(
       navButton(r.label, r.icon, r.count, view.kind === r.kind, () => {
         view = { kind: r.kind, value: null };
@@ -257,6 +273,15 @@ function card(t) {
 
   const meta = catMeta(t.category);
   const iconBox = node.querySelector(".icon");
+  // 兜底：首字母头像（比通用空白图标/统一 emoji 更有辨识度）
+  const showLetter = () => {
+    iconBox.textContent = (t.name || "?").trim().charAt(0).toUpperCase();
+    iconBox.style.background = `${meta.color}22`;
+    iconBox.style.color = meta.color;
+    iconBox.style.fontWeight = "700";
+    iconBox.style.fontSize = "15px";
+    iconBox.style.border = `1px solid ${meta.color}55`;
+  };
   const cached = icons.get(t.id);
   if (cached) {
     const img = document.createElement("img");
@@ -264,8 +289,7 @@ function card(t) {
     img.alt = "";
     iconBox.append(img);
   } else {
-    iconBox.textContent = meta.icon;
-    iconBox.style.background = `${meta.color}22`;
+    showLetter();
     void api.icon(t.id).then((url) => {
       if (!url) return;
       icons.set(t.id, url);
@@ -274,12 +298,17 @@ function card(t) {
       );
       if (!el) return;
       el.textContent = "";
+      el.style.background = "#2a3140";
+      el.style.border = "none";
       const img = document.createElement("img");
       img.src = url;
       img.alt = "";
       el.append(img);
     });
   }
+
+  // 卡片主标题（这一行曾在一次编辑中被误删，导致所有卡片名字为空）
+  node.querySelector(".name").textContent = t.name;
 
   const metaEl = node.querySelector(".meta");
   metaEl.textContent = "";
@@ -338,6 +367,52 @@ function card(t) {
     toast(r.message, !r.ok);
   };
 
+  // 隐藏（不删文件，可在「已隐藏」里恢复）—— 可逆操作，不弹确认框
+  node.querySelector(".act-hide").onclick = async (e) => {
+    e.stopPropagation();
+    data = await api.hide(t.id, true);
+    render();
+    toast(`已隐藏「${t.name}」（左侧「已隐藏」可恢复）`);
+  };
+
+  // 已隐藏视图里的恢复按钮
+  const unhideBtn = node.querySelector(".act-unhide");
+  if (view.kind === "hidden") {
+    unhideBtn.classList.remove("hidden");
+    launchBtn.classList.remove("primary");
+    unhideBtn.onclick = async (e) => {
+      e.stopPropagation();
+      data = await api.hide(t.id, false);
+      render();
+      toast(`已恢复「${t.name}」`);
+    };
+  } else {
+    unhideBtn.classList.add("hidden");
+  }
+
+  // 只对「开始菜单里的失效快捷方式」提供删除（移到回收站，可还原）
+  const trashBtn = node.querySelector(".act-trash");
+  const canTrash =
+    t.source === "startmenu" && t.kind === "lnk" && !t.exists;
+  if (canTrash) {
+    trashBtn.classList.remove("hidden");
+    trashBtn.onclick = async (e) => {
+      e.stopPropagation();
+      if (
+        !confirm(
+          `把失效快捷方式「${t.name}」移到回收站？\n\n文件：${t.path}\n（可在回收站还原，不会动任何 exe）`,
+        )
+      )
+        return;
+      const r = await api.trashLnk(t.id);
+      toast(r.message, !r.ok);
+      data = await api.list();
+      render();
+    };
+  } else {
+    trashBtn.classList.add("hidden");
+  }
+
   const dot = node.querySelector(".status-dot");
   const st = statuses.get(t.id);
   if (st) {
@@ -367,11 +442,83 @@ function cssEscape(s) {
 }
 
 // ── 总渲染 ───────────────────────────────────────────────
+// ── 视图级操作条（批量隐藏 / 恢复 / 清理失效快捷方式）──
+function renderViewbar() {
+  ui.viewbar.innerHTML = "";
+  const list = filteredTools();
+  const btn = (label, fn, danger = false) => {
+    const b = document.createElement("button");
+    if (danger) b.className = "danger";
+    b.textContent = label;
+    b.onclick = fn;
+    return b;
+  };
+
+  if (view.kind === "dead" && list.length) {
+    ui.viewbar.append(
+      btn(`全部隐藏（${list.length} 条失效入口）`, async () => {
+        data = await api.hideMany(
+          list.map((t) => t.id),
+          true,
+        );
+        render();
+        toast(`已隐藏 ${list.length} 条失效入口`);
+      }),
+      btn(
+        `清空失效快捷方式（移入回收站）`,
+        async () => {
+          const lnks = list.filter(
+            (t) => t.source === "startmenu" && t.kind === "lnk",
+          );
+          if (!lnks.length) return toast("这些失效项不是快捷方式，请用「全部隐藏」", true);
+          if (
+            !confirm(
+              `把 ${lnks.length} 个失效快捷方式移到回收站？\n\n会逐个列出：\n` +
+                lnks.map((t) => `· ${t.name}`).join("\n") +
+                `\n\n（文件进回收站可还原，不动任何 exe；其余 ${list.length - lnks.length} 条非快捷方式项会被隐藏）`,
+            )
+          )
+            return;
+          let done = 0;
+          for (const t of lnks) {
+            const r = await api.trashLnk(t.id);
+            if (r.ok) done++;
+          }
+          const rest = list.filter((t) => !lnks.includes(t));
+          if (rest.length)
+            data = await api.hideMany(
+              rest.map((t) => t.id),
+              true,
+            );
+          else data = await api.list();
+          render();
+          toast(`已清理 ${done} 个失效快捷方式`);
+        },
+        true,
+      ),
+    );
+  } else if (view.kind === "hidden" && list.length) {
+    ui.viewbar.append(
+      btn(`全部恢复（${list.length} 条）`, async () => {
+        data = await api.hideMany(
+          list.map((t) => t.id),
+          false,
+        );
+        render();
+        toast(`已恢复 ${list.length} 条`);
+      }),
+    );
+  }
+
+  ui.viewbar.classList.toggle("hidden", ui.viewbar.childElementCount === 0);
+}
+
 function render() {
   renderNav();
   renderFilters();
   renderStats();
   renderBanner();
+  renderViewbar();
   renderGrid();
 }
 

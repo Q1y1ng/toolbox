@@ -7,6 +7,8 @@ data/state.json
 data/scan-raw.json
 data/app-state.json
 data/shot*.png
+data/probe*.png
+data/*.js.json
 *.log
 *.tmp
 .DS_Store

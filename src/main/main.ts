@@ -23,7 +23,8 @@ import { Registry } from "./registry";
 import { runScan } from "./scanner";
 import { probeTools } from "./probe";
 import { copyCommand, launchTool, openDir } from "./launcher";
-import { readJson, writeJsonAtomic } from "./jsonfile";import type { LaunchResult, ToolCategory, ToolStatus } from "./types";
+import { readJson, writeJsonAtomic } from "./jsonfile";
+import type { LaunchResult, ToolCategory, ToolStatus } from "./types";
 
 const IS_DEV = !app.isPackaged;
 const ROOT = path.join(__dirname, "..", "..");
@@ -60,8 +61,7 @@ function seedDataDir() {
   if (!fs.existsSync(seed)) return;
 
   const recordFile = path.join(DATA_DIR, "seed-record.json");
-  const record =
-    readJson<{ curatedSha256?: string }>(recordFile, null) ?? {};
+  const record = readJson<{ curatedSha256?: string }>(recordFile, null) ?? {};
   const bundledText = fs.readFileSync(seed, "utf8");
   const bundledHash = sha256(bundledText);
 
@@ -100,9 +100,14 @@ function iconDir() {
 }
 
 /** 从 exe / lnk 提取图标并缓存为 PNG，返回 file:// URL 供渲染器直接用 */
+/** Windows 里只有通用空白图标的扩展名（提出来反而像坏图） */
+const GENERIC_ICON_EXT = /\.(cmd|bat|ps1|vbs|html?|msc)$/;
+
 async function iconFor(id: string, file: string): Promise<string | null> {
   try {
     if (!fs.existsSync(file)) return null;
+    // 脚本/网页/控制台件：返回 null，让界面用「首字母头像」兑底
+    if (GENERIC_ICON_EXT.test(file.toLowerCase())) return null;
     const dir = iconDir();
     fs.mkdirSync(dir, { recursive: true });
     const stamp = fs.statSync(file).mtimeMs.toString(36);
@@ -266,6 +271,36 @@ function registerIpc() {
     return registry.payload();
   });
 
+  // 批量隐藏/恢复（列表页的“全部隐藏 / 全部恢复”）
+  ipcMain.handle("toolbox:hideMany", (_e, ids: string[], hidden: boolean) => {
+    for (const id of ids) registry.setHidden(id, hidden);
+    registry.load();
+    return registry.payload();
+  });
+
+  // 把「开始菜单里已失效的快捷方式」移到回收站（可恢复，绝不硬删）。
+  // 只对 source=startmenu 的 .lnk 开放：不动便携工具目录、不动 exe 目标本身。
+  ipcMain.handle("toolbox:trashLnk", async (_e, id: string) => {
+    const t = registry.find(id);
+    if (!t) return { ok: false, message: "未找到该条目" };
+    if (t.source !== "startmenu" || !t.path.toLowerCase().endsWith(".lnk")) {
+      return { ok: false, message: "只能删除开始菜单快捷方式（便携工具请用隐藏）" };
+    }
+    if (!fs.existsSync(t.path)) {
+      registry.setHidden(id, true);
+      registry.load();
+      return { ok: true, message: "快捷方式已不存在，已从列表隐藏" };
+    }
+    try {
+      await shell.trashItem(t.path);
+      registry.setHidden(id, true);
+      registry.load();
+      return { ok: true, message: `已把「${t.name}」的快捷方式移到回收站` };
+    } catch (err) {
+      return { ok: false, message: `删除失败：${(err as Error).message}` };
+    }
+  });
+
   ipcMain.handle("toolbox:setCategory", (_e, id: string, cat: string) => {
     if (!registry.isValidCategory(cat))
       return { ok: false, message: "非法分类" };
@@ -322,16 +357,27 @@ app.whenReady().then(() => {
   });
 
   // 截图自检（脚本化验证用，不影响正常启动）：TOOLBOX_SHOT=<png 输出路径>
+  //   TOOLBOX_SHOT_JS=<在页面里执行的 JS> 会把返回值写成 <png>.js.json（DOM 取证用）
   const shot = process.env.TOOLBOX_SHOT;
-  if (shot) {
+  const shotJs = process.env.TOOLBOX_SHOT_JS;
+  if (shot || shotJs) {
     const delay = Number(process.env.TOOLBOX_SHOT_DELAY || 4000);
     setTimeout(() => {
       void (async () => {
         try {
-          const img = await win?.webContents.capturePage();
-          if (img && !img.isEmpty()) fs.writeFileSync(shot, img.toPNG());
+          if (shotJs && win) {
+            const result: unknown = await win.webContents.executeJavaScript(
+              shotJs,
+              true,
+            );
+            writeJsonAtomic(`${shot || "data/shot.png"}.js.json`, result);
+          }
+          if (shot) {
+            const img = await win?.webContents.capturePage();
+            if (img && !img.isEmpty()) fs.writeFileSync(shot, img.toPNG());
+          }
         } catch {
-          /* 截图失败不阻塞退出 */
+          /* 截图/取证失败不阻塞退出 */
         } finally {
           app.quit();
         }

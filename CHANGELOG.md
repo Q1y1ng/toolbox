@@ -26,9 +26,25 @@
 - **原子 JSON 写入**（`src/main/jsonfile.ts`）：临时文件 + rename，避免崩溃留下半截 JSON。
 - 应用图标生成脚本（`scripts/make-icons.ps1`，纯 System.Drawing）与界面截图自检（`scripts/shot.cjs`）。
 - 启动器契约自检（`scripts/verify-launcher.cjs`，6 项：四类复制命令 + 死路径返回 + spawn 通路）。
+- **移除不需要 / 失效的条目**（三种力度）：
+  - 卡片 `✕` 隐藏（不删文件，可在新增的「已隐藏」视图恢复）；
+  - 「失效入口」视图顶部 `全部隐藏（N 条）`、「已隐藏」视图顶部 `全部恢复`；
+  - 失效的**开始菜单快捷方式**可 `🧹` 删除 → 走 `shell.trashItem` 进回收站（可还原）；
+    便携工具只能隐藏，永远不删；后端只对 `source=startmenu` 且 `*.lnk` 的条目开放此操作。
+- `.cmd/.bat/.ps1/.html/.msc` 这类只有 Windows 通用空白图标的目标不再提图标，
+  改显示**首字母头像**（分类配色）——之前的空白图看着就像“图标没显示”。
+- `TOOLBOX_SHOT_JS` 探针：启动时在页面里跑一段 JS 并把返回值写成 JSON，
+  用于回归时直接量 DOM（卡片数 / 名字 / 图标加载 / 滚动容量 / 隐藏流程）， 
+  不必再靠肉眼看截图。
 
 ### 修复
 
+- **所有卡片名字为空**：早前一次改写 meta 渲染时，`oldText` 含了
+  `node.querySelector(".name").textContent = t.name` 而 `newText` 漏写，等于手滑删掉了
+  赋名行（现在补回，并用 DOM 探针断言 `emptyNames === 0`）。
+- **鼠标滚轮无法滚动**：`html,body{overflow:hidden}` + 网格项默认 `min-height:auto`，
+  导致 `.grid` 从不产生滚动条；给 `#app/.main/.grid/.sidebar` 补 `min-height:0` 修复。
+  实测：常用软件视图 `scrollHeight 1683 > clientHeight 777`，`canScroll=true`。
 - 开始菜单快捷方式中文名乱码：PowerShell 5.1 重定向 stdout 时按 OEM 代码页输出，
   在 PS 脚本首行强制 `[Console]::OutputEncoding = UTF8` 解决；该问题同时导致「卸载」类
   噪声过滤失效，一并修复。
