@@ -57,6 +57,14 @@
 
 ### 修复
 
+- **打包态简介全部失效**（只在打包态复现，开发态看不出来）：两个层叠原因 ——
+  1. `package.json` 的 `files` 只显式列了 `data/curated-tools.json`，
+     `startmenu-blurbs.json` **根本没进 asar**；
+  2. `seedDataDir()` 也只播种 curated，blurbs 没拷进可写数据目录。
+  更隐的是第三层：`Registry` 在模块加载期构造一次（那时还没播种），
+  而 `loadBlurbs()` 只在构造函数里调 —— 即使前面两步修好也拿不到简介。
+  现在：**播种改为文件列表**（`SEED_FILES` + 逐文件哈希记录，兼容旧的 `curatedSha256` 字段），
+  `loadBlurbs()` 并入每次 `load()`。教训：**“构造早于播种”这个坑今天踩了两次**（curated 一次、blurbs 一次）。
 - `folder` 类条目（项目卡）的打开目标错误：原先走 `toolDir()` 会打开**父目录**，
   现在 `path` 本身是目录时直接开它（`launchTool` 与 `openDir` 两处都修了）。
 - **所有卡片名字为空**：早前一次改写 meta 渲染时，`oldText` 含了

@@ -175,6 +175,10 @@ scripts/
    否则以纯 Node 模式静默退出（`scripts/shot.cjs` 里已处理）。
 6. **electron-builder 偶发 `EPERM rename win-unpacked`**：句柄被占（杀毒/索引器），
    **直接重试即可成功**。
+   ⚠️ 但 2026-09-19 实测到一种**重试无效**的形态：同一个输出路径\(`dist-electron`\)连续 3 次
+   都报同一个 EPERM，而 `handle64` 查不到任何持有者（杀毒扫描是瞬时句柄，抓不到）。
+   此时**换一个输出目录就好**：`npm run dist:next` 打到 `dist-electron-next`，
+   再 `npm run swap` 就位（脚本会先检查实例是否在跑，必要时 `-Force`）。
 7. **git push 卡在 `github.com:443` 时先查代理**：本机跑的是 Clash for Windows，
    监听 `127.0.0.1:7890`，但 **git 不会自动用 Windows 系统代理**，而直连 443 是被墙的。
    判断：`Test-NetConnection github.com -Port 443` 为 False、而 `127.0.0.1:7890` 在 LISTEN。

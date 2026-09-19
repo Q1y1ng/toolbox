@@ -54,34 +54,55 @@ function resolveSeedDir(): string {
 const DATA_DIR = resolveDataDir();
 const SEED_DIR = resolveSeedDir();
 
+/** 需要从 asar 播种到可写数据目录的文件（新增随包数据文件时加到这里） */
+const SEED_FILES = ["curated-tools.json", "startmenu-blurbs.json"];
+
+interface SeedRecord {
+  /** 旧格式（单文件时代）：仅 curated；继续兼容以免老安装失去“未改过”判定 */
+  curatedSha256?: string;
+  /** 新格式：文件名 → 播种时的内容哈希 */
+  files?: Record<string, string>;
+}
+
+/**
+ * 播种 + 升级同步：
+ *   首次运行 → 从 asar 拷进数据目录
+ *   升级时   → 只有本地副本「自上回播种以来没被改过」才跟随新版
+ *              （用户自己编辑过就永远保留用户版本）
+ */
 function seedDataDir() {
   fs.mkdirSync(DATA_DIR, { recursive: true });
-  const seed = path.join(SEED_DIR, "curated-tools.json");
-  const dest = path.join(DATA_DIR, "curated-tools.json");
-  if (!fs.existsSync(seed)) return;
-
   const recordFile = path.join(DATA_DIR, "seed-record.json");
-  const record = readJson<{ curatedSha256?: string }>(recordFile, null) ?? {};
-  const bundledText = fs.readFileSync(seed, "utf8");
-  const bundledHash = sha256(bundledText);
+  const record = readJson<SeedRecord>(recordFile, null) ?? {};
 
-  // 首次运行：从 asar 播种
-  if (!fs.existsSync(dest)) {
-    fs.copyFileSync(seed, dest);
-    writeJsonAtomic(recordFile, { curatedSha256: bundledHash });
-    return;
+  const files: Record<string, string> = { ...(record.files ?? {}) };
+  if (record.curatedSha256 && !files["curated-tools.json"]) {
+    files["curated-tools.json"] = record.curatedSha256; // 旧记录迁移
   }
 
-  // 升级：只有本地副本「自上回播种以来没被改过」才跟随新版更新，
-  // 用户自己编辑过就永远保留用户版本（不会被升级覆盖）。
-  const localText = fs.readFileSync(dest, "utf8");
-  const localHash = sha256(localText);
-  const seededHash = record.curatedSha256 ?? "";
-  const untouched = seededHash !== "" && seededHash === localHash;
-  if (untouched && bundledHash !== localHash) {
-    fs.copyFileSync(seed, dest);
-    writeJsonAtomic(recordFile, { curatedSha256: bundledHash });
+  for (const name of SEED_FILES) {
+    const src = path.join(SEED_DIR, name);
+    const dst = path.join(DATA_DIR, name);
+    if (!fs.existsSync(src)) continue;
+
+    const bundledText = fs.readFileSync(src, "utf8");
+    const bundledHash = sha256(bundledText);
+
+    if (!fs.existsSync(dst)) {
+      fs.copyFileSync(src, dst);
+      files[name] = bundledHash;
+      continue;
+    }
+
+    const localHash = sha256(fs.readFileSync(dst, "utf8"));
+    const seededHash = files[name] ?? "";
+    if (seededHash !== "" && seededHash === localHash && bundledHash !== localHash) {
+      fs.copyFileSync(src, dst);
+      files[name] = bundledHash;
+    }
   }
+
+  writeJsonAtomic(recordFile, { files });
 }
 
 function sha256(text: string): string {

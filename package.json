@@ -37,6 +37,7 @@
       "src/renderer/**/*",
       "assets/**/*",
       "data/curated-tools.json",
+      "data/startmenu-blurbs.json",
       "package.json"
     ],
     "win": {

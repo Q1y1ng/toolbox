@@ -100,14 +100,17 @@ export class Registry {
   private state: ToolboxState = { ...DEFAULT_STATE };
   private lastScan: string | null = null;
   private uncoveredDirs: string[] = [];
-  private blurbs: { byName: Record<string, string>; byPath: { re: RegExp; desc: string }[]; byCategory: Record<string, string> } = {
+  private blurbs: {
+    byName: Record<string, string>;
+    byPath: { re: RegExp; desc: string }[];
+    byCategory: Record<string, string>;
+  } = {
     byName: {},
     byPath: [],
     byCategory: {},
   };
 
   constructor(private dataDir: string) {
-    this.loadBlurbs();
     this.load();
   }
 
@@ -117,7 +120,10 @@ export class Registry {
     if (!raw) return;
     this.blurbs = {
       byName: raw.byName || {},
-      byPath: (raw.byPath || []).map((r) => ({ re: new RegExp(r.re), desc: r.desc })),
+      byPath: (raw.byPath || []).map((r) => ({
+        re: new RegExp(r.re),
+        desc: r.desc,
+      })),
       byCategory: raw.byCategory || {},
     };
   }
@@ -197,6 +203,10 @@ export class Registry {
 
   /** 重新加载全部数据源（curated → 开始菜单 → 未收录便携目录） */
   load() {
+    // 简介库也要在每次 load 时重读：
+    // Registry 在模块加载期就构造了一次，那时打包态还没把 blurbs 播种到数据目录，
+    // 只在构造函数里读一次会永远拿不到简介（已踩过两次同样的“构造早于播种”坑）。
+    this.loadBlurbs();
     const curated = readJsonOrNull<{ tools: Tool[] }>(
       this.p("curated-tools.json"),
     );
