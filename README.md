@@ -150,6 +150,11 @@ scripts/
    否则以纯 Node 模式静默退出（`scripts/shot.cjs` 里已处理）。
 6. **electron-builder 偶发 `EPERM rename win-unpacked`**：句柄被占（杀毒/索引器），
    **直接重试即可成功**。
+7. **git push 卡在 `github.com:443` 时先查代理**：本机跑的是 Clash for Windows，
+   监听 `127.0.0.1:7890`，但 **git 不会自动用 Windows 系统代理**，而直连 443 是被墙的。
+   判断：`Test-NetConnection github.com -Port 443` 为 False、而 `127.0.0.1:7890` 在 LISTEN。
+   推法：`git -c http.proxy=http://127.0.0.1:7890 -c https.proxy=http://127.0.0.1:7890 push origin main`。
+   （注意：`api.github.com` 一直接得通，所以 `gh api` 能用来核对远端到底推到哪了 —— 不要只看 push 回显。）
 
 ## 性能
 
