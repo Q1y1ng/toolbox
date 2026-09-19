@@ -9,6 +9,7 @@
  */
 import fs from "node:fs";
 import path from "node:path";
+import crypto from "node:crypto";
 import {
   app,
   BrowserWindow,
@@ -22,8 +23,7 @@ import { Registry } from "./registry";
 import { runScan } from "./scanner";
 import { probeTools } from "./probe";
 import { copyCommand, launchTool, openDir } from "./launcher";
-import { writeJsonAtomic } from "./jsonfile";
-import type { LaunchResult, ToolCategory, ToolStatus } from "./types";
+import { readJson, writeJsonAtomic } from "./jsonfile";import type { LaunchResult, ToolCategory, ToolStatus } from "./types";
 
 const IS_DEV = !app.isPackaged;
 const ROOT = path.join(__dirname, "..", "..");
@@ -57,9 +57,35 @@ function seedDataDir() {
   fs.mkdirSync(DATA_DIR, { recursive: true });
   const seed = path.join(SEED_DIR, "curated-tools.json");
   const dest = path.join(DATA_DIR, "curated-tools.json");
-  if (!fs.existsSync(dest) && fs.existsSync(seed)) {
+  if (!fs.existsSync(seed)) return;
+
+  const recordFile = path.join(DATA_DIR, "seed-record.json");
+  const record =
+    readJson<{ curatedSha256?: string }>(recordFile, null) ?? {};
+  const bundledText = fs.readFileSync(seed, "utf8");
+  const bundledHash = sha256(bundledText);
+
+  // 首次运行：从 asar 播种
+  if (!fs.existsSync(dest)) {
     fs.copyFileSync(seed, dest);
+    writeJsonAtomic(recordFile, { curatedSha256: bundledHash });
+    return;
   }
+
+  // 升级：只有本地副本「自上回播种以来没被改过」才跟随新版更新，
+  // 用户自己编辑过就永远保留用户版本（不会被升级覆盖）。
+  const localText = fs.readFileSync(dest, "utf8");
+  const localHash = sha256(localText);
+  const seededHash = record.curatedSha256 ?? "";
+  const untouched = seededHash !== "" && seededHash === localHash;
+  if (untouched && bundledHash !== localHash) {
+    fs.copyFileSync(seed, dest);
+    writeJsonAtomic(recordFile, { curatedSha256: bundledHash });
+  }
+}
+
+function sha256(text: string): string {
+  return crypto.createHash("sha256").update(text, "utf8").digest("hex");
 }
 
 const registry = new Registry(DATA_DIR);

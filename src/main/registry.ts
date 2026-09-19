@@ -192,9 +192,11 @@ export class Registry {
     for (const s of scan?.startMenu?.kept || []) {
       const tgt = (s.target || "").toLowerCase();
       if (!tgt || seen.targets.has(tgt) || seen.paths.has(tgt)) continue;
-      if (seen.names.has(s.name.toLowerCase())) continue;
-      const id = stableId("sm", s.name);
       const exists = s.targetExists ?? fs.existsSync(s.target);
+      // 同名去重只对「还活着的」条目生效：
+      // 失效的同名快捷方式要保留下来（否则“失效入口”清单会漏报，看不到陈旧快捷方式）。
+      if (exists && seen.names.has(s.name.toLowerCase())) continue;
+      const id = stableId("sm", s.name);
       out.push({
         id,
         name: s.name,

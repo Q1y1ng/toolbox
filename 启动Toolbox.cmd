@@ -12,7 +12,7 @@ cd /d "%~dp0"
 rem agent shells export this; it would force Electron into plain Node mode
 set "ELECTRON_RUN_AS_NODE="
 
-set "PORTABLE=dist-electron\Toolbox 0.1.0.exe"
+set "PORTABLE=dist-electron\Toolbox.exe"
 
 if exist "%PORTABLE%" (
   start "" "%PORTABLE%"

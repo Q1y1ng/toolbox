@@ -48,7 +48,18 @@
 ### 变更
 
 - 首次运行（数据目录无 `scan-raw.json`）会自动扫描一次，开箱即用，不再只剩 curated 清单。
-- 打包：`npm run dist` → `dist-electron/Toolbox 0.1.0.exe`（便携单文件，≈89 MB，已实测运行）；
+- 打包：`npm run dist` → `dist-electron/Toolbox.exe`（便携单文件，≈89 MB，已实测运行）；
   新增根目录 `启动Toolbox.cmd`（优先便携版，回退开发态）。
+- **产物名固定为 `Toolbox.exe`**（去掉版本号），使桌面快捷方式与启动器不会随版本升级失效。
+- **种子清单升级策略**：`seed-record.json` 记录播种时的内容哈希 —— 本地副本未被改动
+  则跟随新版覆盖；用户自己改过则永久保留（已用三个场景实测验证：全新播种 59 条 /
+  未改过→跟随新版 / 改过→保留用户版本）。
+- 开始菜单的同名去重只对「目标仍存在」的条目生效：失效的同名快捷方式不再被
+  置删，避免“失效入口”清单漏报（Steam 指向 `D:\pro\steam.exe` 的陈旧项现在能看到了）。
+- 新增 8 个带状态探测的常驻应用条目（Clash Verge / Docker Desktop / Steam / 微信 / QQ /
+  ToDesk / 网易云音乐 / launch-center 的 LC.exe），并给 KeePassXC / OBS 补上探测；
+  带探测工具由 4 个增加到 **14 个**。
+- 新增 `scripts/make-shortcut.ps1`（`npm run shortcut`）：在**真实桌面**
+  （`[Environment]::GetFolderPath('Desktop')`，本机被 OneDrive 重定向）创建快捷方式。
 - 代码风格由 pi-lens/biome 统一（双引号 + 多行属性展开），纯格式化、行为不变
   （重排后 `tsc --noEmit` 通过、启动器自检 6/6）。

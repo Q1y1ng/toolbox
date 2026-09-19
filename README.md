@@ -12,12 +12,12 @@
 
 | 指标 | 数值 |
 | --- | --- |
-| 收录工具 | **234**（curated 51 · 开始菜单 183） |
-| 分类分布 | 开发 81 · 系统 64 · 常用软件 24 · 媒体 24 · 游戏 16 · 效率 14 · 文档 7 · 自建脚本 4 |
+| 收录工具 | **236**（curated 59 · 开始菜单 176） |
+| 分类分布 | 开发 81 · 系统 64 · 常用软件 25 · 媒体 23 · 游戏 16 · 效率 15 · 文档 7 · 自建脚本 4 |
 | 扫描耗时 | ≈2.2 s（43 个便携目录 + 237 个 lnk） |
-| 失效入口自动识别 | **9 个**（QGIS、MuMu、Steam 重复项、PyCharm 2024.1… 目标已不存在） |
+| 失效入口自动识别 | **10 个**（QGIS、MuMu、Steam 过期项、PyCharm 2024.1… 目标已不存在） |
+| 带状态探测 | **14 个**（Everything / QuickLook / Snipaste / Clash Verge / Docker / Steam / 微信 / QQ / ToDesk / OBS / KeePassXC / 网易云 / Mermaid Live / LC） |
 | 主进程工作集 | ≈64 MB（实测，渲染进程另计） |
-| 带状态探测的工具 | 4 个（Everything / QuickLook / Snipaste / Mermaid Live）—— 可继续配 `probe` |
 
 ## 功能
 
@@ -42,18 +42,34 @@ npm start            # 启动仪表盘
 
 ### 日常使用
 
-双击根目录的 **`启动Toolbox.cmd`**：优先启动已打包的便携版，没有则回退到开发态启动。
+双击根目录的 **`启动Toolbox.cmd`**（优先启动已打包的便携版，没有则回退到开发态）；
+或直接双击 **`dist-electron\Toolbox.exe`**，也可用桌面快捷方式（见下）。
+
+### 桌面快捷方式
+
+```bash
+npm run dist            # 先构建便携版
+npm run shortcut        # 在桌面创建「Toolbox 工具仪表盘」快捷方式
+```
+
+产物名固定为 `Toolbox.exe`（不带版本号），所以升级重建后**快捷方式不会失效**；
+快捷方式图标用 `assets/icon.ico`。
+
+> 注意：本机桌面已被 OneDrive 重定向至 `C:\Users\<用户>\OneDrive\Desktop`，
+> 脚本用 `[Environment]::GetFolderPath('Desktop')` 取真实路径，不写死。
 
 ### 打包便携版（单文件 exe，零安装）
 
 ```bash
-npm run dist         # → dist-electron/Toolbox 0.1.0.exe（≈89 MB）
+npm run dist         # → dist-electron/Toolbox.exe（≈89 MB）
 ```
 
 打包版特性：
 
 - 数据落在 **exe 同级的 `Toolbox-data\`**（`PORTABLE_EXECUTABLE_DIR`），不写 C:，删目录即彻底卸载；
-- 首次运行会自动播种 `curated-tools.json` 并**自动扫描一次**（约 2 秒），开箱即用；
+- 首次运行自动播种 `curated-tools.json` 并**自动扫描一次**（约 2 秒），开箱即用；
+- **升级行为**：种子清单用 `seed-record.json` 记下播种时的哈希 ——
+  本地副本没被改过就跟随新版更新；**你自己改过则永远保留你的版本**；
 - 之后按「重新扫描」或托盘菜单刷新即可。
 
 其他脚本：
