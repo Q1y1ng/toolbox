@@ -144,7 +144,11 @@ export async function launchTool(
         return await openPathResult(t.path, `已打开 ${t.name}`);
       }
       case "folder":
-        return await openPathResult(toolDir(t), `已打开目录 ${t.name}`);
+        // folder 类条目的 path 本身就是目标目录（项目卡片），不能再用 toolDir（那是父目录）
+        return await openPathResult(
+          fs.existsSync(t.path) ? t.path : toolDir(t),
+          `已打开目录 ${t.name}`,
+        );
       case "lnk":
         return await openPathResult(t.path, `已启动 ${t.name}`);
       case "script":
@@ -161,7 +165,8 @@ export async function launchTool(
 }
 
 export async function openDir(t: Tool): Promise<LaunchResult> {
-  const dir = toolDir(t);
+  // 项目卡片（folder）的 path 就是目录本身；其余工具用所在目录
+  const dir = t.kind === "folder" ? t.path : toolDir(t);
   if (!fs.existsSync(dir)) return { ok: false, message: `目录不存在：${dir}` };
   return openPathResult(dir, `已打开 ${dir}`);
 }

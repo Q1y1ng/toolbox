@@ -1,5 +1,5 @@
 {
-  "$comment": "手工权威清单 — 便携工具 + 自建脚本。路径均已实测存在（2026-09-19）。字段只增不删改含义。kind: cli=需终端 | gui=双击图形程序 | script=bat/cmd | web=网址或本地页面 | folder=目录。category: dev|system|doc|media|utility|script|app|game",
+  "$comment": "手工权威清单 — 便携工具 + 自建脚本。路径均已实测存在（2026-09-19）。字段只增不删改含义。kind: cli=需终端 | gui=双击图形程序 | script=bat/cmd | web=网址或本地页面 | folder=目录。category: project|dev|system|doc|media|utility|script|app|game|other",
   "schemaVersion": 1,
   "tools": [
     { "id": "fzf", "name": "fzf", "category": "dev", "kind": "cli", "path": "E:\\AI\\tools\\fzf\\fzf.exe", "version": "0.74.4", "desc": "模糊查找：历史 / 文件 / 进程 / git 分支", "tags": ["搜索", "交互"] },
@@ -20,7 +20,6 @@
     { "id": "cargo", "name": "Cargo", "category": "dev", "kind": "cli", "path": "E:\\AI\\tools\\rust\\cargo\\bin\\cargo.exe", "version": "1.98.1", "desc": "Rust 包管理与构建（RUSTUP_HOME/CARGO_HOME 指向本目录）", "tags": ["语言"] },
     { "id": "rustc", "name": "rustc", "category": "dev", "kind": "cli", "path": "E:\\AI\\tools\\rust\\cargo\\bin\\rustc.exe", "version": "1.98.1", "desc": "Rust 编译器", "tags": ["语言"] },
     { "id": "scoop", "name": "scoop", "category": "dev", "kind": "cli", "path": "E:\\AI\\tools\\scoop\\shims\\scoop.cmd", "version": "0.5.3", "desc": "包管理器（SCOOP 指向 E:\\AI\\tools\\scoop，已配 main bucket）", "tags": ["包管理"] },
-
     { "id": "everything", "name": "Everything", "category": "system", "kind": "gui", "path": "E:\\AI\\tools\\everything\\everything.exe", "version": "1.4.1.1032", "desc": "全盘文件名秒查（走 NTFS USN 日志，不用建索引）", "tags": ["搜索", "文件"], "probe": { "type": "process", "name": "everything.exe" } },
     { "id": "crystaldiskinfo", "name": "CrystalDiskInfo", "category": "system", "kind": "gui", "path": "E:\\AI\\tools\\crystaldiskinfo\\DiskInfo64.exe", "version": "9.9.2", "desc": "SSD/HDD SMART 健康度（E 盘事故后刚需）", "tags": ["磁盘", "健康"] },
     { "id": "wiztree", "name": "WizTree", "category": "system", "kind": "gui", "path": "E:\\AI\\tools\\wiztree\\WizTree64.exe", "version": "4.33", "desc": "直接读 MFT 出占用图，比 du 快百倍", "tags": ["磁盘", "占用"] },
@@ -34,7 +33,6 @@
     { "id": "ventoy", "name": "Ventoy2Disk", "category": "system", "kind": "gui", "path": "E:\\AI\\tools\\ventoy\\Ventoy2Disk.exe", "version": "1.1.17", "desc": "多系统 U 盘启动盘（iso 直接拷进去，不用反复格式化）", "tags": ["U盘", "装机"] },
     { "id": "rufus", "name": "Rufus", "category": "system", "kind": "gui", "path": "E:\\AI\\tools\\rufus\\rufus-4.15p.exe", "version": "4.15.2396", "desc": "单系统 U 盘启动盘（便携版）", "tags": ["U盘", "装机"] },
     { "id": "memclean", "name": "MemClean", "category": "system", "kind": "gui", "path": "E:\\AI\\tools\\memclean\\MemClean.exe", "version": "", "desc": "内存清理（含 UAC 提权版 MemClean-UAC.exe，支持 JSON 状态输出）", "tags": ["内存", "自建"] },
-
     { "id": "typst", "name": "Typst", "category": "doc", "kind": "cli", "path": "E:\\AI\\tools\\typst\\typst.exe", "version": "0.15.1", "desc": "标记式排版（对标 LaTeX，秒级编译、无 TeX 依赖）", "tags": ["排版", "PDF"] },
     { "id": "pandoc", "name": "Pandoc", "category": "doc", "kind": "cli", "path": "E:\\AI\\tools\\pandoc\\pandoc.exe", "version": "3.10.2", "desc": "万能文档转换（md/docx/html/epub/pdf/typst 互转）", "tags": ["转换", "文档"] },
     { "id": "obsidian", "name": "Obsidian", "category": "doc", "kind": "gui", "path": "E:\\AI\\tools\\obsidian\\Obsidian.exe", "version": "1.13.7", "desc": "Markdown 笔记 + Mermaid 实时渲染 + 双链", "tags": ["笔记", "Markdown"] },
@@ -43,31 +41,36 @@
     { "id": "mermaid-live", "name": "Mermaid Live（本地版）", "category": "doc", "kind": "script", "path": "E:\\AI\\tools\\mermaid-live\\启动MermaidLive.cmd", "version": "", "desc": "网页式 Mermaid 编辑器 → localhost:3000（Vite dev server）", "tags": ["图表", "Mermaid"], "probe": { "type": "port", "port": 3000 } },
     { "id": "mmdc", "name": "mermaid-cli (mmdc)", "category": "doc", "kind": "cli", "path": "E:\\AI\\tools\\mermaid-cli\\node_modules\\.bin\\mmdc.cmd", "version": "", "desc": "命令行渲染 .mmd → PNG/SVG/PDF", "tags": ["图表", "Mermaid"] },
     { "id": "swashbuckler", "name": "侠客日记", "category": "doc", "kind": "gui", "path": "E:\\AI\\tools\\SwashbucklerDiary\\SwashbucklerDiary.Maui.exe", "version": "1.31", "desc": "日记应用（MAUI）", "tags": ["日记"] },
-
     { "id": "yt-dlp", "name": "yt-dlp", "category": "media", "kind": "cli", "path": "E:\\AI\\tools\\yt-dlp\\yt-dlp.exe", "version": "2026.08.19", "desc": "视频下载（YouTube / B站 / 千余站点）", "tags": ["下载", "视频"] },
     { "id": "aria2c", "name": "aria2c", "category": "media", "kind": "cli", "path": "E:\\AI\\tools\\aria2\\aria2c.exe", "version": "1.37.0", "desc": "多线程 / 断点续传下载器", "tags": ["下载"] },
     { "id": "mpv", "name": "mpv", "category": "media", "kind": "gui", "path": "E:\\AI\\tools\\mpv\\mpv.exe", "version": "0.41.0", "desc": "本地播放器：硬解、字幕、逐帧", "tags": ["播放器"] },
     { "id": "magick", "name": "ImageMagick", "category": "media", "kind": "cli", "path": "E:\\AI\\tools\\imagemagick\\magick.exe", "version": "7.1.2-31 Q16 x64", "desc": "图片批处理：格式转换 / 缩放 / 水印 / 拼接", "tags": ["图片"] },
     { "id": "handbrake", "name": "HandBrake", "category": "media", "kind": "gui", "path": "E:\\AI\\tools\\handbrake\\HandBrake.exe", "version": "1.11.2", "desc": "视频转码（另有 HandBrakeCLI.exe）", "tags": ["转码", "视频"] },
     { "id": "obs", "name": "OBS Studio", "category": "media", "kind": "gui", "path": "E:\\AI\\tools\\obs\\bin\\64bit\\obs64.exe", "version": "32.2.2", "desc": "录屏 / 直播；绿点=正在录制，避免忘了关", "tags": ["录制", "直播"], "probe": { "type": "process", "name": "obs64.exe" } },
-
     { "id": "keepassxc", "name": "KeePassXC", "category": "utility", "kind": "gui", "path": "E:\\AI\\tools\\keepassxc\\KeePassXC.exe", "version": "2.7.12", "desc": "本地密码管理器（另有 keepassxc-cli.exe）；绿点=已解锁常驻", "tags": ["密码", "安全"], "probe": { "type": "process", "name": "KeePassXC.exe" } },
     { "id": "quicklook", "name": "QuickLook", "category": "utility", "kind": "gui", "path": "E:\\AI\\tools\\quicklook\\QuickLook.exe", "version": "4.5.0", "desc": "按空格键预览任意文件（像 macOS）", "tags": ["预览", "常驻"], "probe": { "type": "process", "name": "QuickLook.exe" } },
     { "id": "snipaste", "name": "Snipaste", "category": "utility", "kind": "gui", "path": "E:\\AI\\tools\\snipaste\\Snipaste.exe", "version": "2.11.3", "desc": "截图 + 贴图到屏幕（对照抄数据极有用）", "tags": ["截图", "常驻"], "probe": { "type": "process", "name": "Snipaste.exe" } },
-
     { "id": "heao-booster", "name": "HEAOZIE 加速器", "category": "script", "kind": "script", "path": "E:\\AI\\tools\\HEAOZIE\\gaming_booster\\run_booster.bat", "version": "", "desc": "游戏加速器（Python 脚本 + 配置）", "tags": ["自建", "加速"] },
     { "id": "heao-sleep", "name": "定时休眠", "category": "script", "kind": "script", "path": "E:\\AI\\tools\\HEAOZIE\\定时休眠\\定时睡眠.bat", "version": "", "desc": "定时睡眠（Python 脚本）", "tags": ["自建", "定时"] },
     { "id": "heao-kill", "name": "定时关闭应用", "category": "script", "kind": "script", "path": "E:\\AI\\tools\\HEAOZIE\\定时关闭应用\\定时关闭应用.bat", "version": "", "desc": "定时关闭指定应用（Python 脚本）", "tags": ["自建", "定时"] },
     { "id": "heao-2048", "name": "2048（本地网页）", "category": "script", "kind": "web", "path": "E:\\AI\\tools\\HEAOZIE\\2048\\index.html", "version": "", "desc": "自建 2048 小游戏（纯前端）", "tags": ["自建", "游戏"] },
-
     { "id": "lc", "name": "Launch Center（大模型启动中心）", "category": "system", "kind": "gui", "path": "E:\\AI\\launch-center\\LC.exe", "version": "", "desc": "独立的本地大模型生命周期中心（模型槽位 / 参数档案 / 显存预算）—— 本面板只管它的入口，模型细节归 LC", "tags": ["大模型", "launch-center"], "probe": { "type": "process", "name": "LC.exe" } },
-
     { "id": "clash-verge", "name": "Clash Verge", "category": "utility", "kind": "lnk", "path": "C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs\\Clash Verge.lnk", "target": "E:\\Program Files\\Clash Verge\\clash-verge.exe", "version": "", "desc": "代理客户端（常驻；徽章绿点=代理在跑）", "tags": ["网络", "常驻"], "probe": { "type": "process", "name": "clash-verge.exe" } },
     { "id": "docker-desktop", "name": "Docker Desktop", "category": "dev", "kind": "lnk", "path": "C:\\Users\\s3431\\AppData\\Roaming\\Microsoft\\Windows\\Start Menu\\Programs\\Docker Desktop.lnk", "target": "C:\\Program Files\\Docker\\Docker\\Docker Desktop.exe", "version": "", "desc": "容器运行时（内存大户，徽章可以告诉你它是不是还开着）", "tags": ["容器", "吃内存"], "probe": { "type": "process", "name": "Docker Desktop.exe" } },
     { "id": "steam", "name": "Steam", "category": "game", "kind": "lnk", "path": "C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs\\Steam\\Steam.lnk", "target": "D:\\steam\\Steam.exe", "version": "", "desc": "游戏平台（注意：开始菜单里另一个指向 D:\\pro\\steam.exe 的条目是失效的）", "tags": ["游戏"], "probe": { "type": "process", "name": "steam.exe" } },
     { "id": "wechat", "name": "微信", "category": "utility", "kind": "lnk", "path": "C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs\\微信\\微信.lnk", "target": "D:\\pro\\Weixin\\Weixin.exe", "version": "", "desc": "微信（Weixin 4.x 进程名为 Weixin.exe）", "tags": ["通讯", "常驻"], "probe": { "type": "process", "name": "Weixin.exe" } },
     { "id": "qq", "name": "QQ", "category": "utility", "kind": "lnk", "path": "C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs\\腾讯软件\\QQ\\QQ.lnk", "target": "E:\\QQ\\QQ.exe", "version": "", "desc": "QQ", "tags": ["通讯", "常驻"], "probe": { "type": "process", "name": "QQ.exe" } },
     { "id": "todesk", "name": "ToDesk", "category": "utility", "kind": "lnk", "path": "C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs\\ToDesk\\ToDesk.lnk", "target": "D:\\todesk\\ToDesk.exe", "version": "", "desc": "远程控制（安全相关：徽章能看出它是不是在后台跑着）", "tags": ["远程", "安全"], "probe": { "type": "process", "name": "ToDesk.exe" } },
-    { "id": "netease-music", "name": "网易云音乐", "category": "media", "kind": "lnk", "path": "C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs\\网易云音乐.lnk", "target": "E:\\CloudMusic\\cloudmusic.exe", "version": "", "desc": "音乐播放器", "tags": ["音乐"], "probe": { "type": "process", "name": "cloudmusic.exe" } }
+    { "id": "netease-music", "name": "网易云音乐", "category": "media", "kind": "lnk", "path": "C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs\\网易云音乐.lnk", "target": "E:\\CloudMusic\\cloudmusic.exe", "version": "", "desc": "音乐播放器", "tags": ["音乐"], "probe": { "type": "process", "name": "cloudmusic.exe" } },
+    { "id": "proj-toolbox", "name": "Toolbox（本面板）", "category": "project", "kind": "folder", "path": "E:\\AI\\toolbox", "version": "0.1.0", "desc": "本仪表盘自身：三源扫描 + 一键启动 + 状态探测（Electron，已推 GitHub）", "tags": ["Electron", "进行中"] },
+    { "id": "proj-launch-center", "name": "launch-center", "category": "project", "kind": "folder", "path": "E:\\AI\\launch-center", "version": "", "desc": "大模型启动中心 LC：管 llama-server 的槽位/参数/显存预算（分工：它管模型，面板管入口）", "tags": ["C#", "大模型"] },
+    { "id": "proj-pi-gui", "name": "pi-standalone-gui", "category": "project", "kind": "folder", "path": "E:\\AI\\pi-standalone-gui", "version": "1.2.4", "desc": "Pi Heao GUI 源码：pi coding agent 的 Windows 桌面客户端（Electron，已发布）", "tags": ["Electron", "已发布"] },
+    { "id": "proj-ai-chat", "name": "AI Chat", "category": "project", "kind": "folder", "path": "E:\\AI\\AI Chat", "version": "", "desc": "本机大模型只读聊天（端口 3100）：可看文件 + 联网搜索，不写入不执行", "tags": ["Web", "本地模型"] },
+    { "id": "proj-token-monitor", "name": "token-monitor", "category": "project", "kind": "folder", "path": "E:\\AI\\token-monitor", "version": "", "desc": "本地 AI 用量/额度监控（端口 27800）", "tags": ["监控"] },
+    { "id": "proj-starstate", "name": "Starstate", "category": "project", "kind": "folder", "path": "E:\\AI\\Starstate", "version": "", "desc": "Unity 游戏项目（架空历史星际题材）；源码可从 GitHub Q1y1ng/Starstate 重建", "tags": ["Unity", "游戏"] },
+    { "id": "proj-exam-pilot", "name": "exam-pilot", "category": "project", "kind": "folder", "path": "E:\\AI\\exam-pilot", "version": "", "desc": "StarMap 项目：考试/学习辅助（产物 StarMap Launcher）", "tags": ["学习"] },
+    { "id": "proj-random-drawer", "name": "RandomDrawer（幸运之子摇号机）", "category": "project", "kind": "folder", "path": "E:\\AI\\RandomDrawer", "version": "", "desc": "摇号机小工具（桌面上的「幸运之子——摇号机.exe」就是它）", "tags": ["小工具"] },
+    { "id": "proj-inventory", "name": "_inventory（工具脚本/盘点）", "category": "project", "kind": "folder", "path": "E:\\AI\\_inventory", "version": "", "desc": "工具安装脚本与盘点报告：install_tools.ps1 / install_specials.ps1 / PATH 备份等", "tags": ["脚本", "清点"] },
+    { "id": "proj-tools-dir", "name": "便携工具集目录（E:\\AI\\tools）", "category": "project", "kind": "folder", "path": "E:\\AI\\tools", "version": "", "desc": "本面板收录的 43 个绿色便携工具的实体目录（解压即用，删目录即卸载）", "tags": ["目录"] }
   ]
 }

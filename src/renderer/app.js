@@ -352,6 +352,10 @@ function card(t) {
   };
 
   const launchBtn = node.querySelector(".act-launch");
+  // 按钮文案随类型变：项目/目录类条目的主操作是“打开目录”而不是“启动”
+  if (t.kind === "folder") launchBtn.textContent = "📂 打开目录";
+  else if (t.kind === "cli") launchBtn.textContent = "▶ 开终端";
+  else if (t.kind === "web") launchBtn.textContent = "▶ 打开";
   launchBtn.onclick = (e) => {
     e.stopPropagation();
     doLaunch(t);

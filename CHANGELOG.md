@@ -6,7 +6,18 @@
 
 ### 新增
 
-- **开始菜单**：`npm run pin:start`（`scripts/pin-start.ps1`）写入
+- **每个条目都有简介**：
+  - 开始菜单条目：新增 `data/startmenu-blurbs.json`（三级匹配：名称精确 → 目标路径正则 → 分类兜底），
+    把原先 166 条「简介就是文件路径」的卡片全部换成一句人话（如
+    `7-Zip File Manager => 7-Zip 文件管理器（压缩/解压）`、`Epson Scan 2 => Epson 扫描驱动主程序`）。
+  - 修掉一个真 bug：路径规则原先同时匹配 `target + lnk`，而**所有开始菜单 lnk 的路径都含
+    `...\Microsoft\Windows\Start Menu\...`** → 「Windows 系统工具」规则误命中（如 7-Zip）。
+    改为**只匹配 target**（target 为空才退回 lnk）；影响面已量化（10 条命中，其中 8 条是失效项不走简介）。
+- **「我的项目」分类**：`E:\AI` 下的 10 个项目各一张卡（一句简介 + `📂 打开目录`）：
+  Toolbox 自身 / launch-center / pi-standalone-gui / AI Chat / token-monitor /
+  Starstate / exam-pilot / RandomDrawer / _inventory / 便携工具集目录。
+- 卡片主按钮文案随类型变：目录 → `📂 打开目录`、命令行 → `▶ 开终端`、网页 → `▶ 打开`。
+- 新增「开始菜单」：`npm run pin:start`（`scripts/pin-start.ps1`）写入
   `%APPDATA%\Microsoft\Windows\Start Menu\Programs\Toolbox 工具仪表盘.lnk`，
   之后 `Win` 键搜 `toolbox` 即可启动；并会枚举 shell 动词尝试“固定到开始屏幕”——
   实测该动词存在但程序化调用被系统拒（`0x80070005 E_ACCESSDENIED`），已优雅处理并给出手动两步路径。
@@ -46,6 +57,8 @@
 
 ### 修复
 
+- `folder` 类条目（项目卡）的打开目标错误：原先走 `toolDir()` 会打开**父目录**，
+  现在 `path` 本身是目录时直接开它（`launchTool` 与 `openDir` 两处都修了）。
 - **所有卡片名字为空**：早前一次改写 meta 渲染时，`oldText` 含了
   `node.querySelector(".name").textContent = t.name` 而 `newText` 漏写，等于手滑删掉了
   赋名行（现在补回，并用 DOM 探针断言 `emptyNames === 0`）。

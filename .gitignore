@@ -1,6 +1,7 @@
 node_modules/
 dist/
 dist-electron/
+dist-electron-next/
 data/tools.json
 data/icons/
 data/state.json
@@ -13,3 +14,4 @@ data/*.js.json
 *.tmp
 .DS_Store
 *.tmp-*
+data/inst*.png

@@ -21,6 +21,7 @@ import type {
 } from "./types";
 
 export const CATEGORIES: CategoryMeta[] = [
+  { id: "project", label: "我的项目", icon: "🧩", color: "#56CCF2" },
   { id: "dev", label: "开发工具", icon: "⌨", color: "#4C8DFF" },
   { id: "system", label: "系统运维", icon: "🧰", color: "#F2994A" },
   { id: "doc", label: "文档排版", icon: "📄", color: "#9B7BFF" },
@@ -87,14 +88,63 @@ const DEFAULT_STATE: ToolboxState = {
   categoryOverrides: {},
 };
 
+/** 开始菜单条目的简介库（data/startmenu-blurbs.json） */
+interface BlurbRules {
+  byName?: Record<string, string>;
+  byPath?: { re: string; desc: string }[];
+  byCategory?: Record<string, string>;
+}
+
 export class Registry {
   private tools: Tool[] = [];
   private state: ToolboxState = { ...DEFAULT_STATE };
   private lastScan: string | null = null;
   private uncoveredDirs: string[] = [];
+  private blurbs: { byName: Record<string, string>; byPath: { re: RegExp; desc: string }[]; byCategory: Record<string, string> } = {
+    byName: {},
+    byPath: [],
+    byCategory: {},
+  };
 
   constructor(private dataDir: string) {
+    this.loadBlurbs();
     this.load();
+  }
+
+  /** 载入开始菜单简介库（缺失时不影响主流程） */
+  private loadBlurbs() {
+    const raw = readJsonOrNull<BlurbRules>(this.p("startmenu-blurbs.json"));
+    if (!raw) return;
+    this.blurbs = {
+      byName: raw.byName || {},
+      byPath: (raw.byPath || []).map((r) => ({ re: new RegExp(r.re), desc: r.desc })),
+      byCategory: raw.byCategory || {},
+    };
+  }
+
+  /**
+   * 给开始菜单条目补一句人话简介：
+   *   名称精确匹配 → 目标路径正则（自上而下首个命中）→ 分类兑底 → 最后退回文件名
+   */
+  private blurbFor(
+    name: string,
+    target: string | undefined,
+    lnk: string,
+  ): string {
+    const byName = this.blurbs.byName[name];
+    if (byName) return byName;
+    // 只拿 target 去匹配路径规则：
+    // 开始菜单的 lnk 自身路径都含 `...\Microsoft\Windows\Start Menu\...`，
+    // 把 lnk 一起丢进去会让「Windows 系统工具」这类规则误命中（如 7-Zip）。
+    // 只有 target 为空时才退回用 lnk。
+    const hay = (target || "").trim() || lnk || "";
+    for (const r of this.blurbs.byPath) {
+      if (r.re.test(hay)) return r.desc;
+    }
+    const cat = categorize(name, target);
+    const byCat = this.blurbs.byCategory[cat];
+    if (byCat) return byCat;
+    return `开始菜单入口：${path.basename(target || lnk)}`;
   }
 
   private p(...s: string[]) {
@@ -204,7 +254,9 @@ export class Registry {
         kind: "lnk",
         path: s.lnk,
         target: s.target,
-        desc: exists ? s.target : "⚠ 目标路径不存在（快捷方式已失效）",
+        desc: exists
+          ? this.blurbFor(s.name, s.target, s.lnk)
+          : "⚠ 目标路径不存在（快捷方式已失效）",
         tags: [],
         source: "startmenu",
         exists,

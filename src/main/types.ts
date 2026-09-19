@@ -3,6 +3,7 @@
 export type ToolKind = "cli" | "gui" | "script" | "web" | "folder" | "lnk";
 
 export type ToolCategory =
+  | "project"
   | "dev"
   | "system"
   | "doc"

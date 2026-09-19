@@ -336,6 +336,23 @@ function registerIpc() {
 }
 
 // ── 生命周期 ───────────────────────────────────────────────
+// 单实例锁：多开会互相覆盖 state.json（收藏/隐藏/最近使用），也会抢图标缓存。
+// 第二个实例直接退出，并把已存在的窗口唤到前台。
+const gotSingleInstance = app.requestSingleInstanceLock();
+if (!gotSingleInstance) {
+  app.quit();
+} else {
+  app.on("second-instance", () => {
+    if (win) {
+      if (win.isMinimized()) win.restore();
+      win.show();
+      win.focus();
+    } else {
+      createWindow();
+    }
+  });
+}
+
 app.whenReady().then(() => {
   // 先播种再加载：打包态首次运行时 curated-tools.json 是刚刚拷进 DATA_DIR 的，
   // 而 Registry 在模块加载期已经构造过一次（那时文件还不存在），必须重新 load。

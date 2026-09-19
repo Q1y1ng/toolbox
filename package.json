@@ -16,7 +16,9 @@
     "shortcut": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/make-shortcut.ps1",
     "pin:start": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/pin-start.ps1",
     "typecheck": "tsc --noEmit",
-    "dist": "npm run build && electron-builder --win portable --publish never"
+    "dist": "npm run build && electron-builder --win portable --publish never",
+    "dist:next": "npm run build && electron-builder --win portable --publish never -c.directories.output=dist-electron-next",
+    "swap": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/swap-build.ps1"
   },
   "devDependencies": {
     "@types/node": "^22.0.0",
